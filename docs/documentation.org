@@ -1,0 +1,127 @@
+#+STARTUP: indent
+#+LANGUAGE: en
+#+TITLE: Macnica DHW Embedded Linux Platform
+#+AUTHOR: O.S. Systems Software
+#+EMAIL: contato@ossystems.com.br
+#+LATEX_CLASS: article
+#+OPTIONS: date:nil
+
+* Document revision
+| Version | Description     | Release date |
+|---------+-----------------+--------------|
+|     1.0 | Initial release |   04-30-2020 |
+|---------+-----------------+--------------|
+
+See [[https://github.com/MacnicaDHW/meta-macnica/blob/master/docs/documentation.org][here]] the latest revision for this document.
+
+* Supported boards
+- Rockchip MINIEVB RV1108 development kit
+
+* Setup instructions
+** Required Packages for the Build Host
+The list of packages you need on the host development system can be large when
+covering all build scenarios using the Yocto Project. See [[https://www.yoctoproject.org/docs/3.1/ref-manual/ref-manual.html#detailed-supported-distros][Yocto Project Reference Manual]]
+for details.
+
+** Getting the ~repo~ tool
+The first step is to download and prepare all the Yocto Project (YP)
+environment, you need to have the ~repo~ tool installed in your host machine.
+
+For Debian/Ubuntu Linux distro you can install it running:
+#+BEGIN_SRC bash
+  sudo apt install repo
+#+END_SRC
+
+If you're using other Linux distro or the ~repo~ tools is not in the repository
+you can download directly from upstream and set your distro as shown below:
+
+#+BEGIN_SRC bash
+  mkdir ~/bin
+  curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+  chmod a+x ~/bin/repo
+  PATH=${PATH}:~/bin
+#+END_SRC
+
+** Download the platform source
+The next step is to download the BSP source code, we have a platform to fetch
+all files that is necessary to build the project.
+
+To download all sources run the following commands:
+#+BEGIN_SRC bash
+  mkdir macnica-yocto-platform
+  cd macnica-yocto-platform
+  repo init -u https://github.com/MacnicaDHW/yocto-platform.git
+  repo sync
+#+END_SRC
+
+At the end of the commands, you have every metadata you need to start work with.
+
+** Preparing the environment
+Before starting to work you need to load the YP variables to run bitbake
+command:
+#+BEGIN_SRC bash
+  source setup-environment build
+#+END_SRC
+
+Note that you need to run the command above for all new terminal, the loaded
+variables are only visible to the terminal that you source the ~setup-environment~
+script.
+
+* Rockchip MINIEVB RV1108 development kit
+** Building the image
+To build the image run:
+#+BEGIN_SRC bash
+  bitbake core-image-base
+#+END_SRC
+
+This process can take a long time depending on your host machine.
+
+When the image is ready, the resulted files are available in
+~build/tmp/deploy/images/rv1108-minievb~ directory.
+
+** Build Rockchip binary tools
+~rkdeveloptool~ is a tool that gives you a simple way to read/write rockusb device
+and it's needed to use it to flash the bootloader into /SPI NOR/
+device. ~RV1108_usb_boot.bin~ is used by ~rkdeveloptool~ to boot from /USB/. These two
+binaries are needed to flash bootloader to /SPI NOR/.
+
+To generate the binary tools run:
+#+BEGIN_SRC bash
+  bitbake rkbin-native
+#+END_SRC
+
+you can find the files in ~build/tmp/deploy/images/rv1108-minievb/~
+
+** Flash bootloader to /SPI NOR/
+Rockchip MINIEVB RV1108 kit boots from /SPI NOR/ device, so you need to flash the
+bootloader to the /SPI NOR/ device and to do this you need the ~rkdeveloptool~ and
+~RV1108_usb_boot.bin~ files, that are found in
+~build/tmp/deploy/images/rv1108-minievb/~ directory.
+
+To flash bootloader you need to put MINIEVB kit in download mode holding the /UPDATE/ button on top
+
+of kit and plugging the /USB/ /OTG/ cable to your host machine.
+
+Then, you can flash the bootloader running:
+#+ATTR_LATEX: :options basicstyle=\ttfamily\scriptsize
+#+BEGIN_SRC bash
+  sudo build/tmp/deploy/images/rv1108-minievb/rkdeveloptool db build/tmp/deploy/images/rv1108-minievb/RV1108_usb_boot.bin
+  sudo build/tmp/deploy/images/rv1108-minievb/rkdeveloptool wl 0x40 build/tmp/deploy/images/rv1108-minievb/u-boot.img
+  sudo build/tmp/deploy/images/rv1108-minievb/rkdeveloptool rd
+#+END_SRC
+
+** Flash core-image-base to /SD card/
+Now that you have the bootloader in /SPI NOR/ device you can flash the ~core-image-base~ to /SD card/ to boot the kit.
+
+To flash the image to /SD card/ run:
+#+BEGIN_SRC bash
+zcat build/tmp/deploy/images/rv1108-minievb/core-image-base-rv1108-minievb.wic.gz | sudo dd of=/dev/sdX bs=4M
+#+END_SRC
+
+The ~sdX~ if the device that /SD card/ was addressed in you host machine, you can check your using
+
+* References
+- [[http://rockchip.wikidot.com/rk1108][RV1108 SoC features]]
+- [[https://github.com/CollaborativeWritersHub/heading-for-the-yocto-project/releases/download/18.10.0/Heading-for-the-Yocto-Project.pdf][Heading for the Yocto Project]]
+- [[https://www.amazon.com/dp/B0751HKPB4][Embedded Linux Development using Yocto Projects - Second Edition]]
+- [[https://www.yoctoproject.org/docs/3.1/ref-manual/ref-manual.html#detailed-supported-distros][Yocto Project Reference Manual]]
