@@ -1,3 +1,4 @@
 docs/auto
 docs/*.tex
 docs/*.pdf
+/docs/_minted-documentation/
