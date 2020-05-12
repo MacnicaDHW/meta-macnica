@@ -6,7 +6,7 @@ DEPENDS += "flex-native lz4-native"
 
 inherit kernel
 
-SRCREV = "edd3365819f3b91932cd7399aca634c62e2439aa"
+SRCREV = "8321db74eb2dc3e15650eed006ac1de1d33b962b"
 SRCBRANCH = "5.4.x+macnica"
 SRC_URI = "git://git@github.com/MacnicaDHW/linux.git;branch=${SRCBRANCH};protocol=ssh"
 
