@@ -15,11 +15,13 @@
 This document is intended to be updated as we add new features, boards and
 information. Below is the history of changes this document had:
 
-|---------+-----------------+--------------|
-| Version | Description     | Release date |
-|---------+-----------------+--------------|
-|     1.0 | Initial release |   04-30-2020 |
-|---------+-----------------+--------------|
+|---------+--------------------------------------------------------+--------------|
+| Version | Description                                            | Release date |
+|---------+--------------------------------------------------------+--------------|
+|     1.1 | Add Building a SDK for Application development section |   05-15-2020 |
+|---------+--------------------------------------------------------+--------------|
+|     1.0 | Initial release                                        |   04-30-2020 |
+|---------+--------------------------------------------------------+--------------|
 
 The latest revision for this document can be seen [[https://github.com/MacnicaDHW/meta-macnica/blob/master/docs/documentation.org][here]].
 
@@ -85,6 +87,28 @@ variables are only visible to the terminal that you source the ~setup-environmen
 script.
 
 * Rockchip MINIEVB RV1108 development kit
+** Building a SDK for Application development
+
+Build the cross GDB component and make it available for debugging. Build the SDK
+that matches the image. Building the SDK is best for a production build that can
+be used later for debugging, especially during long term maintenance:
+
+#+BEGIN_SRC bash
+  bitbake -c populate_sdk core-image-base
+#+END_SRC
+
+Alternatively, you can build the minimal toolchain components that match the
+target. Doing so creates a smaller than typical SDK and only contains a minimal
+set of components with which to build simple test applications, as well as run
+the debugger:
+
+#+BEGIN_SRC bash
+  bitbake meta-toolchain
+#+END_SRC
+
+When the SDK is ready, the resulted files are available in the ~deploy~
+directory. By default it is located in ~build/tmp/deploy/sdk~.
+
 ** Building the image
 
 To build the image run:
